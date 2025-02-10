@@ -1,0 +1,44 @@
+name: Build MusicBox
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Build Docker image
+      run: docker build --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache -t musicbox-builder .
+
+    - name: Build MusicBox
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace musicbox-builder \
+        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/PiZero.cmake && \
+        cmake --build build
+
+    - name: Upload MusicBox binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: MusicBox
+        path: build/MusicBox
