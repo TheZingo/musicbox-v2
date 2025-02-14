@@ -47,3 +47,30 @@ jobs:
       with:
         name: MusicBox
         path: build/MusicBox
+
+  build_vue:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Install Node.js
+      uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+      with:
+        node-version: '21' 
+
+    - name: Install dependencies
+      run: |
+        cd webroot
+        npm install
+
+    - name: Build Vue.js project
+      run: |
+        cd webroot
+        npm run build
+
+    - name: Upload Vue.js build artifact
+      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      with:
+        name: VueBuild
+        path: webroot/dist
