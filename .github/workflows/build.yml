@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_app:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -45,10 +45,11 @@ jobs:
     - name: Upload MusicBox binary
       uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
-        name: MusicBox
+        name: build_part_app
         path: build/MusicBox
+        retention-days: 1
 
-  build_vue:
+  build_web_interface:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -72,23 +73,24 @@ jobs:
     - name: Upload Vue.js build artifact
       uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
-        name: VueBuild
+        name: build_part_web
         path: webroot/dist
+        retention-days: 1
 
   combine_artifacts:
     runs-on: ubuntu-latest
-    needs: [build, build_vue]
+    needs: [build_app, build_web_interface]
     steps:
     - name: Download MusicBox binary
       uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
       with:
-        name: MusicBox
+        name: build_part_app
         path: musicbox
 
     - name: Download Vue build
       uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
       with:
-        name: VueBuild
+        name: build_part_web
         path: vue-dist
 
     - name: Create combined structure
